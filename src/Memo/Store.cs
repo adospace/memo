@@ -57,7 +57,7 @@ public abstract class LocalStore<T> : Store<T>, ILocalStore where T : class
 
 }
 
-public abstract class GlobalStore<T> : Store<T>, ILocalStore where T : class
+public abstract class GlobalStore<T> : Store<T>, IGlobalStore where T : class
 {
 
 }

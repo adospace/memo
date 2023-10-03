@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,13 +17,29 @@ public static class ServiceCollectionExtensions
         {
             if (typeof(ILocalStore).IsAssignableFrom(type))
             {
-                services.AddTransient(type)
-                    .AddScoped(p => (IStore)p.GetRequiredService(type));
+                var alreadyRegisteredService = services.FirstOrDefault(_=>_.ServiceType == type);
+                if (alreadyRegisteredService != null &&
+                    alreadyRegisteredService.Lifetime != ServiceLifetime.Transient)
+                {
+                    throw new InvalidOperationException($"Type {type} is already registered with Lifetime {alreadyRegisteredService.Lifetime}: expecting {ServiceLifetime.Transient} as it's a local store");
+                }
+                else if (alreadyRegisteredService == null)
+                {
+                    services.AddTransient(type);
+                }
             }
             else if (typeof(IGlobalStore).IsAssignableFrom(type))
             {
-                services.AddSingleton(type)
-                    .AddScoped(p => (IStore)p.GetRequiredService(type));
+                var alreadyRegisteredService = services.FirstOrDefault(_ => _.ServiceType == type);
+                if (alreadyRegisteredService != null &&
+                    alreadyRegisteredService.Lifetime != ServiceLifetime.Singleton)
+                {
+                    throw new InvalidOperationException($"Type {type} is already registered with Lifetime {alreadyRegisteredService.Lifetime}: expecting {ServiceLifetime.Singleton} as it's a global store");
+                }
+                else if (alreadyRegisteredService == null)
+                {
+                    services.AddSingleton(type);
+                }
             }
             else if (typeof(IStore).IsAssignableFrom(type))
             {
