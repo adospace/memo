@@ -6,10 +6,10 @@ public class TestStoreObserver
 
     class CounterStore : LocalStore<CounterState>
     {
-        protected override CounterState InitialState() => new(0);
+        public CounterStore(): base(()=>new(0)) { }
 
         public void Increment()
-            => Mutate(State with { Counter = State.Counter + 1 });
+            => Mutate(s => s with { Counter = State.Counter + 1 });
     }
 
     class CounterStateObserver : IStoreObserver

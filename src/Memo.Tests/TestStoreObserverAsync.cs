@@ -1,3 +1,4 @@
+
 namespace Memo.Tests;
 
 public class TestStoreObserverAsync
@@ -6,13 +7,15 @@ public class TestStoreObserverAsync
 
     class CounterStore : LocalStore<CounterState>
     {
-        protected override CounterState InitialState() => new(0);
+        public CounterStore() : base(() => new(0))
+        {
+        }
 
         public async Task Increment()
         {
             await Task.Delay(1000);
 
-            Mutate(State with { Counter = State.Counter + 1 });
+            Mutate(s => s with { Counter = State.Counter + 1 });
         }
     }
 

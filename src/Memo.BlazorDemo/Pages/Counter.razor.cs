@@ -9,8 +9,10 @@ public partial class Counter
 
     class CounterStore : LocalStore<CounterState>
     {
-        protected override CounterState InitialState() => new(0);
+        public CounterStore() : base(() => new(0))
+        {
+        }
 
-        public void Increment() => Mutate(State with { Counter = State.Counter + 1 });
+        public void Increment() => Mutate(s => s with { Counter = State.Counter + 1 });
     }
 }

@@ -21,16 +21,14 @@ public abstract class Store<T> : IStore where T : class
 
     public T State { get; private set; }
 
-    protected Store()
+    protected Store(Func<T> initialStateFunc)
     {
-        State = InitialState();
+        State = initialStateFunc();
     }
 
-    protected abstract T InitialState();
-
-    protected void Mutate(T state)
+    public void Mutate(Func<T, T> stateFunc)
     {
-        State = state;
+        State = stateFunc(State);
 
         for (int i = 0; i < _listeners.Count; i++)
         {
@@ -54,12 +52,12 @@ public abstract class Store<T> : IStore where T : class
 
 public abstract class LocalStore<T> : Store<T>, ILocalStore where T : class
 {
-
+    protected LocalStore(Func<T> initialStateFunc):base(initialStateFunc) { }
 }
 
 public abstract class GlobalStore<T> : Store<T>, IGlobalStore where T : class
 {
-
+    protected GlobalStore(Func<T> initialStateFunc) : base(initialStateFunc) { }
 }
 
 public interface IStoreObserver

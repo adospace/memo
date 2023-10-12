@@ -11,22 +11,21 @@ public partial class FetchData
         private readonly HttpClient _http;
 
         public FetchDataStore(HttpClient http)
+            : base(() => new(IsLoading: false, Array.Empty<WeatherForecast>()))
         {
             _http = http;
         }
         
-        protected override FetchDataState InitialState() 
-            => new(IsLoading: false, Array.Empty<WeatherForecast>());
 
         public async Task LoadData()
         {
-            Mutate(State with { IsLoading = true });
+            Mutate(s => s with { IsLoading = true });
 
             await Task.Delay(2000);
             
             var forecasts = await _http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json") ?? throw new InvalidOperationException();
 
-            Mutate(new FetchDataState(IsLoading: false, Forecasts: forecasts));
+            Mutate(s => new FetchDataState(IsLoading: false, Forecasts: forecasts));
         }
     }
 }
