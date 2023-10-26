@@ -26,7 +26,7 @@ public abstract class Store<T> : IStore where T : class
         State = initialStateFunc();
     }
 
-    public void Mutate(Func<T, T> stateFunc)
+    protected void Mutate(Func<T, T> stateFunc)
     {
         State = stateFunc(State);
 
