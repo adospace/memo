@@ -11,7 +11,7 @@ namespace Memo;
 
 public static class ServiceCollectionExtensions
 {
-    public static void AddMemoStoresFromAssembly(this IServiceCollection services, Assembly assembly)
+    public static void AddMemoStoresFromAssembly(this IServiceCollection services, Assembly assembly, ServiceLifetime globalStoreServiceLifetime = ServiceLifetime.Singleton)
     {
         foreach (var type in assembly.GetTypes())
         {
@@ -21,7 +21,7 @@ public static class ServiceCollectionExtensions
                 if (alreadyRegisteredService != null &&
                     alreadyRegisteredService.Lifetime != ServiceLifetime.Transient)
                 {
-                    throw new InvalidOperationException($"Type {type} is already registered with Lifetime {alreadyRegisteredService.Lifetime}: expecting {ServiceLifetime.Transient} as it's a local store");
+                    throw new InvalidOperationException($"Type {type} is already registered with Lifetime {alreadyRegisteredService.Lifetime}: expecting {ServiceLifetime.Transient}");
                 }
                 else if (alreadyRegisteredService == null)
                 {
@@ -32,13 +32,13 @@ public static class ServiceCollectionExtensions
             {
                 var alreadyRegisteredService = services.FirstOrDefault(_ => _.ServiceType == type);
                 if (alreadyRegisteredService != null &&
-                    alreadyRegisteredService.Lifetime != ServiceLifetime.Singleton)
+                    alreadyRegisteredService.Lifetime != globalStoreServiceLifetime)
                 {
-                    throw new InvalidOperationException($"Type {type} is already registered with Lifetime {alreadyRegisteredService.Lifetime}: expecting {ServiceLifetime.Singleton} as it's a global store");
+                    throw new InvalidOperationException($"Type {type} is already registered with Lifetime {alreadyRegisteredService.Lifetime}: expecting {globalStoreServiceLifetime}");
                 }
                 else if (alreadyRegisteredService == null)
                 {
-                    services.AddSingleton(type);
+                    services.Add(new ServiceDescriptor(type, type, globalStoreServiceLifetime));
                 }
             }
             else if (typeof(IStore).IsAssignableFrom(type))
